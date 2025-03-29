@@ -10,7 +10,7 @@ This mod is intended to make Villager trades more meaningful and less grindy.
 
 ## Configurabilty
 
-- Custom Config is not implemented yet.
+- Rerolling can be individually turned on/off and chances can be adjusted in bettertrades-common.toml
 
 ## License
 
