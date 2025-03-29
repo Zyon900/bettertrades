@@ -1,0 +1,45 @@
+modLoader="javafml" #mandatory
+
+loaderVersion="[2,)" #mandatory
+
+# The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
+# Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
+license="MIT"
+
+# A URL to refer people to when problems occur with this mod
+#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
+
+[[mods]] #mandatory
+
+modId="bettertrades" #mandatory
+
+version="0.0.1" #mandatory
+
+displayName="BetterTrades" #mandatory
+
+# A file name (in the root of the mod JAR) containing a logo for display
+#logoFile="examplemod.png" #optional
+
+authors="Zyon900" #optional
+
+# The description text for the mod (multi line!) (#mandatory)
+description='''Lets Villagers change their trades on sleep or restock, to make Villager trading more fun and less grindy.'''
+
+# The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
+[[mixins]]
+config="bettertrades.mixins.json"
+
+[[dependencies.bettertrades]] #optional
+    modId="neoforge" #mandatory
+    type="required" #mandatory
+    versionRange="${neo_version_range}" #mandatory
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.bettertrades]]
+    modId="minecraft"
+    type="required"
+    # This version range declares a minimum of the current minecraft version up to but not including the next major version
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"

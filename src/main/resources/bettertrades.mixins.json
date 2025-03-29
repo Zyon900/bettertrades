@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.zyon900.bettertrades.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "VillagerMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
