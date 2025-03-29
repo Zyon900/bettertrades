@@ -13,7 +13,7 @@ license="MIT"
 
 modId="bettertrades" #mandatory
 
-version="0.0.1" #mandatory
+version="0.0.2" #mandatory
 
 displayName="BetterTrades" #mandatory
 
@@ -32,7 +32,7 @@ config="bettertrades.mixins.json"
 [[dependencies.bettertrades]] #optional
     modId="neoforge" #mandatory
     type="required" #mandatory
-    versionRange="${neo_version_range}" #mandatory
+    versionRange="[2,)" #mandatory
     ordering="NONE"
     side="BOTH"
 

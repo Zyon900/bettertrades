@@ -1,6 +1,7 @@
 package com.zyon900.bettertrades.mixin;
 
 import com.google.common.collect.Lists;
+import com.zyon900.bettertrades.Config;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerData;
@@ -18,10 +19,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import java.util.ArrayList;
-
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 @Mixin(Villager.class)
@@ -41,16 +39,7 @@ public abstract class VillagerMixin {
 
     @Shadow @Final private static int TRADES_PER_LEVEL;
 
-
     private Villager bettertrades$self = (Villager)(Object)(this);
-
-    private final Boolean bettertrades$reRollOnRestock = true;
-
-    private final Double bettertrades$reRollOnRestockChance = 0.25;
-
-    private final Boolean bettertrades$rerollOnSleep = true;
-
-    private final Double bettertrades$rerollOnSleepChance = 1.0;
 
     /**
      * Injects into Villager restock method head, to re-roll trades.
@@ -63,8 +52,10 @@ public abstract class VillagerMixin {
             cancellable = true
     )
     private void bettertrades$replaceRestock(CallbackInfo ci) {
+        boolean enabled = Config.COMMON.enableReRollOnRestock.get();
+        Double chance = Config.COMMON.reRollOnRestockChance.get();
         // Return early if no re-roll happens
-        if(!bettertrades$reRollOnRestock || bettertrades$self.getRandom().nextDouble() > bettertrades$reRollOnRestockChance)
+        if(!enabled || bettertrades$self.getRandom().nextDouble() > chance)
             return;
         // Re-roll trades and update amount of restocks
         try {
@@ -88,8 +79,11 @@ public abstract class VillagerMixin {
             at = @At("RETURN")
     )
     private void bettertrades$addToStopSleeping(CallbackInfo ci) {
+        boolean enabled = Config.COMMON.enableReRollOnSleep.get();
+        Double chance = Config.COMMON.reRollOnSleepChance.get();
+
         // Return early if no re-roll happens
-        if(!bettertrades$rerollOnSleep || bettertrades$self.getRandom().nextDouble() > bettertrades$rerollOnSleepChance)
+        if(!enabled || bettertrades$self.getRandom().nextDouble() > chance)
             return;
         // Re-roll trades
         try {
@@ -165,7 +159,6 @@ public abstract class VillagerMixin {
                 if(offers.size() - 1 < currentTradeIndex)
                     break;
                 if(bettertrades$reRollAllowed(offers.get(currentTradeIndex))) {
-                    LOGGER.info("Setting trade: #"+currentTradeIndex+" at level #" + level);
                     offers.set(currentTradeIndex, currentLevelTrades.remove(bettertrades$self.getRandom().nextInt(currentLevelTrades.size())).getOffer(bettertrades$self, this.bettertrades$self.getRandom()));
                 }
                 currentTradeIndex++;
