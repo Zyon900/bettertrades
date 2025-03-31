@@ -13,7 +13,7 @@ public class Config {
         public final ModConfigSpec.BooleanValue enableReRollOnSleep;
         public final ModConfigSpec.DoubleValue reRollOnSleepChance;
         // Settings for re-rolling trades when villagers restock
-        public final ModConfigSpec.EnumValue reRollOnRestockType;
+        public final ModConfigSpec.EnumValue<RerollType> reRollOnRestockType;
         public final ModConfigSpec.DoubleValue reRollOnRestockChance;
 
         CommonConfig(ModConfigSpec.Builder builder) {

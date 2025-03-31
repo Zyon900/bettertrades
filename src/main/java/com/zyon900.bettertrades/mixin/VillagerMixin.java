@@ -75,7 +75,7 @@ public abstract class VillagerMixin {
             cancellable = true
     )
     private void bettertrades$replaceRestock(CallbackInfo ci) {
-        RerollType type = (RerollType) Config.COMMON.reRollOnRestockType.get();
+        RerollType type = Config.COMMON.reRollOnRestockType.get();
         Double chance = Config.COMMON.reRollOnRestockChance.get();
         // Return early if no re-roll happens
         if(bettertrades$self.getRandom().nextDouble() > chance)
