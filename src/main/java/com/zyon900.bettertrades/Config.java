@@ -13,15 +13,16 @@ public class Config {
         public final ModConfigSpec.BooleanValue enableReRollOnSleep;
         public final ModConfigSpec.DoubleValue reRollOnSleepChance;
         // Settings for re-rolling trades when villagers restock
-        public final ModConfigSpec.BooleanValue enableReRollOnRestock;
+        public final ModConfigSpec.EnumValue reRollOnRestockType;
         public final ModConfigSpec.DoubleValue reRollOnRestockChance;
 
         CommonConfig(ModConfigSpec.Builder builder) {
             builder.comment("Villager Trade Settings").push("trades");
             enableReRollOnSleep = builder.define("enableReRollOnSleep", true);
             reRollOnSleepChance = builder.defineInRange("reRollOnSleepChance", 1.0, 0.0, 1.0);
-            enableReRollOnRestock = builder.define("enableReRollOnRestock", true);
-            reRollOnRestockChance = builder.defineInRange("reRollOnRestockChance", 0.25, 0.0, 1.0);
+            builder.comment("Accepted values for reRollOnRestockType: USED_UP_REROLL (Only rerolls trades that have been used up), FULL_REROLL (Rerolls all trades), DISABLED (No rerolls, and normal restocking for trades on restock.");
+            reRollOnRestockType = builder.defineEnum("reRollOnRestockType", RerollType.USED_UP_REROLL);
+            reRollOnRestockChance = builder.defineInRange("reRollOnRestockChance", 1.0, 0.0, 1.0);
             builder.pop();
         }
     }

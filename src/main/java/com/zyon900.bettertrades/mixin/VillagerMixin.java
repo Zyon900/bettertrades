@@ -2,7 +2,10 @@ package com.zyon900.bettertrades.mixin;
 
 import com.google.common.collect.Lists;
 import com.zyon900.bettertrades.Config;
+import com.zyon900.bettertrades.IRerollValidator;
+import com.zyon900.bettertrades.RerollType;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -39,7 +42,27 @@ public abstract class VillagerMixin {
 
     @Shadow @Final private static int TRADES_PER_LEVEL;
 
-    private Villager bettertrades$self = (Villager)(Object)(this);
+    /**
+     * Used to reference {@link AbstractVillager} the Villager extends from.
+     */
+    private final Villager bettertrades$self = (Villager)(Object)(this);
+
+    /**
+     * Validates for non-unique trades - currently returns true if the item is not a filled map or needs to be restocked.
+     */
+    private final IRerollValidator bettertrades$validateNonUniqueTrades = (MerchantOffer offer) -> {
+        // Check if the result is a filled map
+        ItemStack result = offer.getResult();
+        boolean isMapOffer = result.getItem() == Items.FILLED_MAP;
+
+        // If result is map and does not need to be restocked, invalidate reroll.
+        return !isMapOffer || offer.needsRestock();
+    };
+
+    /**
+     * Validates for offers that need to be restocked.
+     */
+    private final IRerollValidator bettertrades$validateUsedUpTrades = MerchantOffer::needsRestock;
 
     /**
      * Injects into Villager restock method head, to re-roll trades.
@@ -52,14 +75,30 @@ public abstract class VillagerMixin {
             cancellable = true
     )
     private void bettertrades$replaceRestock(CallbackInfo ci) {
-        boolean enabled = Config.COMMON.enableReRollOnRestock.get();
+        RerollType type = (RerollType) Config.COMMON.reRollOnRestockType.get();
         Double chance = Config.COMMON.reRollOnRestockChance.get();
         // Return early if no re-roll happens
-        if(!enabled || bettertrades$self.getRandom().nextDouble() > chance)
+        if(bettertrades$self.getRandom().nextDouble() > chance)
             return;
+        // Determine rerollValidator
+        IRerollValidator rerollValidator;
+        switch (type) {
+            case FULL_REROLL ->
+                rerollValidator = bettertrades$validateNonUniqueTrades;
+
+            case USED_UP_REROLL ->
+                rerollValidator = bettertrades$validateUsedUpTrades;
+
+            case DISABLED -> {return;}
+
+            default -> {
+                LOGGER.error("Illegal reroll type for restocking Villagers: no reroll on restock will happen.");
+                return;
+            }
+        }
         // Re-roll trades and update amount of restocks
         try {
-            bettertrades$reRollTrades();
+            bettertrades$reRollTrades(rerollValidator);
 
             this.lastRestockGameTime = bettertrades$self.level().getGameTime();
             ++this.numberOfRestocksToday;
@@ -87,7 +126,7 @@ public abstract class VillagerMixin {
             return;
         // Re-roll trades
         try {
-            bettertrades$reRollTrades();
+            bettertrades$reRollTrades(bettertrades$validateNonUniqueTrades);
         } catch (Exception e) {
             LOGGER.error("Error during Villager sleep addition mixin:", e);
         }
@@ -97,7 +136,7 @@ public abstract class VillagerMixin {
      * Re-rolls the villagers trades
      */
     @Unique
-    private void bettertrades$reRollTrades() {
+    private void bettertrades$reRollTrades(IRerollValidator rerollValidator) {
         // Update demand
         this.updateDemand();
 
@@ -112,7 +151,7 @@ public abstract class VillagerMixin {
             return;
 
         // Generate trade offers
-        MerchantOffers offers = bettertrades$buildMerchantOffers(villagerData, int2objectmap);
+        MerchantOffers offers = bettertrades$buildMerchantOffers(villagerData, int2objectmap, rerollValidator);
 
         // Finish up
         this.setOffers(offers);
@@ -145,7 +184,7 @@ public abstract class VillagerMixin {
      * @return New merchant offers for villager.
      */
     @Unique
-    private MerchantOffers bettertrades$buildMerchantOffers(VillagerData villagerData, Int2ObjectMap<VillagerTrades.ItemListing[]> int2objectmap) {
+    private MerchantOffers bettertrades$buildMerchantOffers(VillagerData villagerData, Int2ObjectMap<VillagerTrades.ItemListing[]> int2objectmap, IRerollValidator rerollValidator) {
         // Copy current offers
         MerchantOffers offers = bettertrades$self.getOffers().copy();
 
@@ -158,26 +197,12 @@ public abstract class VillagerMixin {
             for (int i = 1; i <= maxTradesPerLevel ; i++) {
                 if(offers.size() - 1 < currentTradeIndex)
                     break;
-                if(bettertrades$reRollAllowed(offers.get(currentTradeIndex))) {
+                if(rerollValidator.allowReroll(offers.get(currentTradeIndex))) {
                     offers.set(currentTradeIndex, currentLevelTrades.remove(bettertrades$self.getRandom().nextInt(currentLevelTrades.size())).getOffer(bettertrades$self, this.bettertrades$self.getRandom()));
                 }
                 currentTradeIndex++;
             }
         }
         return offers;
-    }
-
-    /**
-     * Checks whether an offer is allowed to be re-rolled - currently filled maps are not allowed to be re-rolled.
-     * @param offer MerchantOffer to be checked
-     * @return True if re-roll is allowed
-     */
-    @Unique
-    public Boolean bettertrades$reRollAllowed(MerchantOffer offer) {
-        // Check if the result is a filled map
-        ItemStack result = offer.getResult();
-        boolean isMapOffer = result.getItem() == Items.FILLED_MAP;
-
-        return !isMapOffer;
     }
 }
