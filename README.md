@@ -5,8 +5,8 @@ This mod is intended to make Villager trades more meaningful and less grindy.
 ## Functionality
 
 - Reroll trades when villager sleeps.
-- Reroll trades when villager restocks. (With a 25% chance)
-- Filled Maps cannot be rerolled.
+- Reroll trades when villager restocks. (Only trades that are used up - configurable in config)
+- Filled Maps can only be rerolled if the trade is used up and needs to be restocked.
 
 ## Configurabilty
 
