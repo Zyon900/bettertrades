@@ -13,7 +13,7 @@ license="MIT"
 
 modId="bettertrades" #mandatory
 
-version="0.1.0" #mandatory
+version="0.1.1" #mandatory
 
 displayName="BetterTrades" #mandatory
 
@@ -39,7 +39,6 @@ config="bettertrades.mixins.json"
 [[dependencies.bettertrades]]
     modId="minecraft"
     type="required"
-    # This version range declares a minimum of the current minecraft version up to but not including the next major version
-    versionRange="${minecraft_version_range}"
+    versionRange="[1.21.1,1.21.4]"
     ordering="NONE"
     side="BOTH"
