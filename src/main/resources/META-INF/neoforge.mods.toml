@@ -39,6 +39,6 @@ config="bettertrades.mixins.json"
 [[dependencies.bettertrades]]
     modId="minecraft"
     type="required"
-    versionRange="$[1.21.1,1.21.4]"
+    versionRange="[1.21.1,1.21.4]"
     ordering="NONE"
     side="BOTH"
